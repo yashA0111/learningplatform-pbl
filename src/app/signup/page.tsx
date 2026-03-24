@@ -27,7 +27,7 @@ export default function SignupPage() {
     const result = signupSchema.safeParse({ name, email, password });
     if (!result.success) {
       const errors: Record<string, string> = {};
-      result.error.issues.forEach((err: any) => {
+      result.error.issues.forEach((err) => {
         if (err.path[0]) {
           errors[err.path[0] as string] = err.message;
         }
@@ -53,7 +53,7 @@ export default function SignupPage() {
       } else {
         setError(data.message || "Something went wrong");
       }
-    } catch (err) {
+    } catch {
       setError("An error occurred. Please try again later.");
     } finally {
       setLoading(false);

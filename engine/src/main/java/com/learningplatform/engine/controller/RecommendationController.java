@@ -1,0 +1,27 @@
+package com.learningplatform.engine.controller;
+
+import com.learningplatform.engine.model.Course;
+import com.learningplatform.engine.service.RecommendationService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/recommend")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "${app.cors.allowed-origins}")
+public class RecommendationController {
+
+    private final RecommendationService recommendationService;
+
+    @GetMapping("/{userId}")
+    public List<Course> getRecommendations(@PathVariable String userId) {
+        return recommendationService.recommendCourses(userId);
+    }
+
+    @PostMapping("/by-interests")
+    public List<Course> getRecommendationsByInterests(@RequestBody List<String> interests) {
+        return recommendationService.recommendCoursesByInterests(interests);
+    }
+}

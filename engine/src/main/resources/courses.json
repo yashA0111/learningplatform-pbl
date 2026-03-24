@@ -1,0 +1,52 @@
+[
+  {
+    "id": "c1",
+    "title": "Machine Learning Basics",
+    "tags": ["AI", "Python", "Data Science", "Machine Learning"]
+  },
+  {
+    "id": "c2",
+    "title": "Introduction to React",
+    "tags": ["Frontend", "JavaScript", "React", "Web Development"]
+  },
+  {
+    "id": "c3",
+    "title": "Advanced Java Programming",
+    "tags": ["Backend", "Java", "Spring Boot", "Software Engineering"]
+  },
+  {
+    "id": "c4",
+    "title": "Python for Data Analysis",
+    "tags": ["Python", "Data Science", "Pandas", "Analytics"]
+  },
+  {
+    "id": "c5",
+    "title": "Fullstack Web Development",
+    "tags": ["JavaScript", "React", "Node.js", "Web Development"]
+  },
+  {
+    "id": "c6",
+    "title": "Data Structures and Algorithms",
+    "tags": ["Java", "C++", "Algorithms", "Software Engineering"]
+  },
+  {
+    "id": "c7",
+    "title": "Deep Learning with PyTorch",
+    "tags": ["AI", "Python", "Deep Learning", "Machine Learning"]
+  },
+  {
+    "id": "c8",
+    "title": "Frontend Masters: Advanced CSS",
+    "tags": ["Frontend", "CSS", "Web Development", "Design"]
+  },
+  {
+    "id": "c9",
+    "title": "Building Scalable APIs",
+    "tags": ["Backend", "Java", "Spring Boot", "Architecture"]
+  },
+  {
+    "id": "c10",
+    "title": "Introduction to AI",
+    "tags": ["AI", "Machine Learning", "Concepts"]
+  }
+]

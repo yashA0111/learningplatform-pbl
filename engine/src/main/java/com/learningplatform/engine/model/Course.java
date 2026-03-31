@@ -12,5 +12,6 @@ import java.util.List;
 public class Course {
     private String id;
     private String title;
+    private String url;
     private List<String> tags;
 }

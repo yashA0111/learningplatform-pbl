@@ -2,51 +2,61 @@
   {
     "id": "c1",
     "title": "Machine Learning Basics",
+    "url": "https://www.coursera.org/specializations/machine-learning-introduction",
     "tags": ["AI", "Python", "Data Science", "Machine Learning"]
   },
   {
     "id": "c2",
     "title": "Introduction to React",
+    "url": "https://react.dev/learn",
     "tags": ["Frontend", "JavaScript", "React", "Web Development"]
   },
   {
     "id": "c3",
     "title": "Advanced Java Programming",
+    "url": "https://docs.oracle.com/javase/tutorial/",
     "tags": ["Backend", "Java", "Spring Boot", "Software Engineering"]
   },
   {
     "id": "c4",
     "title": "Python for Data Analysis",
+    "url": "https://pandas.pydata.org/docs/getting_started/index.html",
     "tags": ["Python", "Data Science", "Pandas", "Analytics"]
   },
   {
     "id": "c5",
     "title": "Fullstack Web Development",
+    "url": "https://www.freecodecamp.org/learn/scientific-computing-with-python/",
     "tags": ["JavaScript", "React", "Node.js", "Web Development"]
   },
   {
     "id": "c6",
     "title": "Data Structures and Algorithms",
+    "url": "https://www.geeksforgeeks.org/data-structures/",
     "tags": ["Java", "C++", "Algorithms", "Software Engineering"]
   },
   {
     "id": "c7",
     "title": "Deep Learning with PyTorch",
+    "url": "https://pytorch.org/tutorials/",
     "tags": ["AI", "Python", "Deep Learning", "Machine Learning"]
   },
   {
     "id": "c8",
     "title": "Frontend Masters: Advanced CSS",
+    "url": "https://frontendmasters.com/courses/advanced-css-layouts/",
     "tags": ["Frontend", "CSS", "Web Development", "Design"]
   },
   {
     "id": "c9",
     "title": "Building Scalable APIs",
+    "url": "https://spring.io/projects/spring-boot",
     "tags": ["Backend", "Java", "Spring Boot", "Architecture"]
   },
   {
     "id": "c10",
     "title": "Introduction to AI",
+    "url": "https://www.elementsofai.com/",
     "tags": ["AI", "Machine Learning", "Concepts"]
   }
 ]

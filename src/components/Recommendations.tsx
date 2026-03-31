@@ -5,6 +5,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 type Course = {
   id: string;
   title: string;
+  url: string;
   tags: string[];
 };
 
@@ -58,26 +59,34 @@ export async function RecommendationsList({ interests }: { interests: string[] }
           <ScrollArea className="w-full whitespace-nowrap rounded-md border border-slate-200 dark:border-slate-800">
             <div className="flex w-max space-x-3 sm:space-x-4 p-3 sm:p-4">
               {recommendedCourses.map((course) => (
-                <Card key={course.id} className="w-[240px] sm:w-[300px] shrink-0 shadow-sm transition-all hover:shadow-md dark:border-slate-800">
-                  <CardHeader>
-                    <CardTitle className="truncate">{course.title}</CardTitle>
-                    <CardDescription className="truncate">Course ID: {course.id}</CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="flex flex-wrap gap-2">
-                      {course.tags.slice(0, 3).map((tag, idx) => (
-                        <span key={idx} className="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:text-indigo-400">
-                          {tag}
-                        </span>
-                      ))}
-                      {course.tags.length > 3 && (
-                        <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-800 dark:text-slate-300">
-                          +{course.tags.length - 3} more
-                        </span>
-                      )}
-                    </div>
-                  </CardContent>
-                </Card>
+                <a 
+                  key={course.id} 
+                  href={course.url} 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="block transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                >
+                  <Card className="w-[240px] sm:w-[300px] shrink-0 shadow-sm transition-all hover:shadow-md dark:border-slate-800 h-full">
+                    <CardHeader>
+                      <CardTitle className="truncate">{course.title}</CardTitle>
+                      <CardDescription className="truncate">Course ID: {course.id}</CardDescription>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="flex flex-wrap gap-2">
+                        {course.tags.slice(0, 3).map((tag, idx) => (
+                          <span key={idx} className="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:text-indigo-400">
+                            {tag}
+                          </span>
+                        ))}
+                        {course.tags.length > 3 && (
+                          <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2.5 py-0.5 text-xs font-medium text-slate-800 dark:text-slate-300">
+                            +{course.tags.length - 3} more
+                          </span>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                </a>
               ))}
             </div>
             <ScrollBar orientation="horizontal" />

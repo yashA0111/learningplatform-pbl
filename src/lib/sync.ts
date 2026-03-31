@@ -20,8 +20,9 @@ export async function syncAllCoursesToEngine() {
     // Map MongoDB courses to the format expected by the Java engine
     const coursesToSync = courses.map(c => ({
       id: c._id.toString(),
-      title: c.title,
-      tags: c.tags
+      title: (c as any).title,
+      url: (c as any).url,
+      tags: (c as any).tags
     }));
 
     const response = await fetch(`${engineUrl}/api/recommend/register-batch`, {

@@ -17,12 +17,19 @@ export async function syncAllCoursesToEngine() {
 
     const engineUrl = process.env.NEXT_PUBLIC_ENGINE_URL || "http://localhost:8080";
     
+    interface SyncCourse {
+      _id: { toString: () => string };
+      title: string;
+      url: string;
+      tags: string[];
+    }
+    
     // Map MongoDB courses to the format expected by the Java engine
-    const coursesToSync = courses.map(c => ({
+    const coursesToSync = (courses as unknown as SyncCourse[]).map(c => ({
       id: c._id.toString(),
-      title: (c as any).title,
-      url: (c as any).url,
-      tags: (c as any).tags
+      title: c.title,
+      url: c.url,
+      tags: c.tags
     }));
 
     const response = await fetch(`${engineUrl}/api/recommend/register-batch`, {

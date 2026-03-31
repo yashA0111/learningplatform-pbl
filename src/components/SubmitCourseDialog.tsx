@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { useForm } from "react-hook-form";
+import { useForm, Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
@@ -31,7 +31,7 @@ export function SubmitCourseDialog() {
     reset,
     formState: { errors },
   } = useForm<CourseFormInput>({
-    resolver: zodResolver(courseFormSchema) as any,
+    resolver: zodResolver(courseFormSchema) as unknown as Resolver<CourseFormInput>,
     defaultValues: {
       title: "",
       url: "",
@@ -41,7 +41,7 @@ export function SubmitCourseDialog() {
   });
 
   const onSubmit = async (data: CourseFormInput) => {
-    // The data passed by zodResolver will actually be CourseFormOutput
+    // The resolver has already transformed the data, the type cast is safe
     const validatedData = data as unknown as CourseFormOutput;
     
     setLoading(true);

@@ -33,39 +33,45 @@ function VerifyEmailContent() {
   }, [resendCooldown]);
 
   const handleChange = (index: number, value: string) => {
-    if (!/^\d?$/.test(value)) return;
+    // Take only the last character if multiple are entered (for replacement)
+    const char = value.slice(-1);
+    if (!/^\d?$/.test(char)) return;
+
     const newOtp = [...otp];
-    newOtp[index] = value;
+    newOtp[index] = char;
     setOtp(newOtp);
 
-    // Auto-focus next input
-    if (value && index < 5) {
+    // Auto-focus next input if a digit was entered
+    if (char && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+
+    // Auto-submit if all digits are filled
+    const otpString = newOtp.join("");
+    if (otpString.length === 6) {
+      handleAutoVerify(otpString);
+    }
+  };
+
+  const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === "Backspace") {
+      if (!otp[index] && index > 0) {
+        // If current box is empty, move back and clear previous
+        const newOtp = [...otp];
+        newOtp[index - 1] = "";
+        setOtp(newOtp);
+        inputRefs.current[index - 1]?.focus();
+      }
+    } else if (e.key === "ArrowLeft" && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    } else if (e.key === "ArrowRight" && index < 5) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
-  const handleKeyDown = (index: number, e: React.KeyboardEvent) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-  };
-
-  const handlePaste = (e: React.ClipboardEvent) => {
-    e.preventDefault();
-    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
-    if (pasted.length === 6) {
-      setOtp(pasted.split(""));
-      inputRefs.current[5]?.focus();
-    }
-  };
-
-  const handleVerify = async () => {
-    const otpString = otp.join("");
-    if (otpString.length !== 6) {
-      setError("Please enter the complete 6-digit code");
-      return;
-    }
-
+  const handleAutoVerify = async (otpString: string) => {
+    if (otpString.length !== 6 || loading) return;
+    
     setLoading(true);
     setError("");
 
@@ -82,15 +88,34 @@ function VerifyEmailContent() {
         setSuccess(true);
         setTimeout(() => {
           router.push("/login?verified=true");
-        }, 2000);
+        }, 1500);
       } else {
         setError(data.message || "Verification failed");
+        // Optional: clear OTP on error? 
+        // setOtp(["", "", "", "", "", ""]);
+        // inputRefs.current[0]?.focus();
       }
     } catch {
       setError("An error occurred. Please try again.");
     } finally {
       setLoading(false);
     }
+  };
+
+  const handlePaste = (e: React.ClipboardEvent) => {
+    e.preventDefault();
+    const pasted = e.clipboardData.getData("text").replace(/\D/g, "").slice(0, 6);
+    if (pasted.length === 6) {
+      const newOtp = pasted.split("");
+      setOtp(newOtp);
+      inputRefs.current[5]?.focus();
+      handleAutoVerify(pasted);
+    }
+  };
+
+  const handleVerify = () => {
+    const otpString = otp.join("");
+    handleAutoVerify(otpString);
   };
 
   const handleResend = async () => {
@@ -155,7 +180,8 @@ function VerifyEmailContent() {
                 value={digit}
                 onChange={(e) => handleChange(index, e.target.value)}
                 onKeyDown={(e) => handleKeyDown(index, e)}
-                className="h-14 w-12 text-center text-2xl font-bold border-2 focus:border-indigo-500 focus:ring-indigo-500"
+                onFocus={(e) => e.target.select()}
+                className="h-14 w-12 text-center text-2xl font-bold border-2 focus:border-indigo-600 focus:ring-4 focus:ring-indigo-500/20 transition-all duration-200 bg-white dark:bg-slate-800"
                 autoFocus={index === 0}
               />
             ))}

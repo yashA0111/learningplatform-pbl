@@ -3,39 +3,39 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { signupSchema } from "@/lib/validations";
+import { signupSchema, SignupInput } from "@/lib/validations";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 export default function SignupPage() {
   const router = useRouter();
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<SignupInput>({
+    resolver: zodResolver(signupSchema),
+    defaultValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
+  });
+
+  const password = watch("password", "");
+
+  const onSubmit = async (data: SignupInput) => {
     setLoading(true);
     setError("");
-    setFieldErrors({});
-
-    const result = signupSchema.safeParse({ name, email, password });
-    if (!result.success) {
-      const errors: Record<string, string> = {};
-      result.error.issues.forEach((err) => {
-        if (err.path[0]) {
-          errors[err.path[0] as string] = err.message;
-        }
-      });
-      setFieldErrors(errors);
-      setLoading(false);
-      return;
-    }
 
     try {
       const res = await fetch("/api/register", {
@@ -43,15 +43,15 @@ export default function SignupPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(result.data),
+        body: JSON.stringify(data),
       });
 
-      const data = await res.json();
+      const result = await res.json();
 
       if (res.ok) {
-        router.push(`/verify-email?email=${encodeURIComponent(result.data.email)}`);
+        router.push(`/verify-email?email=${encodeURIComponent(data.email)}`);
       } else {
-        setError(data.message || "Something went wrong");
+        setError(result.message || "Something went wrong");
       }
     } catch {
       setError("An error occurred. Please try again later.");
@@ -81,17 +81,16 @@ export default function SignupPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="name" className="text-sm font-semibold">Name</Label>
               <Input
                 id="name"
                 placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className={`h-11 ${fieldErrors.name ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                {...register("name")}
+                className={`h-11 ${errors.name ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               />
-              {fieldErrors.name && <p className="text-xs text-red-500">{fieldErrors.name}</p>}
+              {errors.name && <p className="text-xs text-red-500 font-medium">{errors.name.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-semibold">Email</Label>
@@ -99,22 +98,20 @@ export default function SignupPage() {
                 id="email"
                 type="email"
                 placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`h-11 ${fieldErrors.email ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                {...register("email")}
+                className={`h-11 ${errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               />
-              {fieldErrors.email && <p className="text-xs text-red-500">{fieldErrors.email}</p>}
+              {errors.email && <p className="text-xs text-red-500 font-medium">{errors.email.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-semibold">Password</Label>
               <Input
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`h-11 ${fieldErrors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                {...register("password")}
+                className={`h-11 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               />
-              {fieldErrors.password && <p className="text-xs text-red-500">{fieldErrors.password}</p>}
+              {errors.password && <p className="text-xs text-red-500 font-medium">{errors.password.message}</p>}
               {password.length > 0 && (
                 <div className="grid grid-cols-2 gap-1 mt-2">
                   {passwordChecks.map((check, i) => (
@@ -128,9 +125,21 @@ export default function SignupPage() {
                 </div>
               )}
             </div>
-            {error && <p className="text-sm font-medium text-red-500">{error}</p>}
-            <Button className="w-full h-11 text-base font-semibold transition-all hover:scale-[1.02]" type="submit" disabled={loading}>
-              {loading ? "Creating account..." : "Sign Up"}
+            
+            {error && (
+              <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 text-red-600 dark:text-red-400 text-sm font-medium">
+                <AlertCircle className="h-4 w-4" />
+                {error}
+              </div>
+            )}
+
+            <Button className="w-full h-11 text-base font-semibold transition-all hover:scale-[1.02] bg-indigo-600 hover:bg-indigo-700 text-white" type="submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Creating account...
+                </>
+              ) : "Sign Up"}
             </Button>
           </form>
         </CardContent>
@@ -146,3 +155,4 @@ export default function SignupPage() {
     </div>
   );
 }
+

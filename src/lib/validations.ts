@@ -56,16 +56,34 @@ export type SignupInput = z.infer<typeof signupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type OtpInput = z.infer<typeof otpSchema>;
 
+export const tagSchema = z
+  .string()
+  .min(1, "Tag cannot be empty")
+  .max(30, "Tag must be at most 30 characters")
+  .regex(/^[a-zA-Z0-9\s#+-.]+$/, "Tag contains invalid characters")
+  .trim();
+
 export const courseSchema = z.object({
-  title: z.string().min(1, "Title is required"),
-  url: z.string().url("Must be a valid URL"),
-  platform: z.string().min(1, "Platform is required"),
-  tags: z.array(z.string()).optional().default([]),
+  title: z
+    .string()
+    .min(3, "Title must be at least 3 characters")
+    .max(100, "Title must be at most 100 characters")
+    .trim(),
+  url: z
+    .string()
+    .url("Must be a valid URL")
+    .trim(),
+  platform: z
+    .string()
+    .min(2, "Platform must be at least 2 characters")
+    .max(50, "Platform name is too long")
+    .trim(),
+  tags: z.array(tagSchema).min(1, "At least one tag is required").max(10, "Maximum 10 tags allowed").default([]),
 });
 
 export const userUpdateSchema = z.object({
-  interests: z.array(z.string()).optional(),
-  completedCourses: z.array(z.string()).optional(),
+  interests: z.array(tagSchema).optional(),
+  completedCourses: z.array(tagSchema).optional(),
 });
 
 export const emailSchema = z.object({
@@ -76,6 +94,33 @@ export const emailSchema = z.object({
     .toLowerCase(),
 });
 
+export const courseFormSchema = z.object({
+  title: z
+    .string()
+    .min(3, "Title must be at least 3 characters")
+    .max(100, "Title must be at most 100 characters")
+    .trim(),
+  url: z
+    .string()
+    .url("Must be a valid URL")
+    .trim(),
+  platform: z
+    .string()
+    .min(2, "Platform must be at least 2 characters")
+    .max(50, "Platform name is too long")
+    .trim(),
+  tags: z
+    .string()
+    .transform((val) => val.split(",").map((tag) => tag.trim()).filter(Boolean))
+    .pipe(z.array(tagSchema).min(1, "At least one valid tag is required").max(10, "Maximum 10 tags allowed")),
+});
+
+export type TagInput = z.infer<typeof tagSchema>;
 export type CourseInput = z.infer<typeof courseSchema>;
+export type CourseFormInput = z.input<typeof courseFormSchema>;
+export type CourseFormOutput = z.infer<typeof courseFormSchema>;
 export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
 export type EmailInput = z.infer<typeof emailSchema>;
+
+
+

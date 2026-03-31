@@ -25,12 +25,30 @@ export function BackendConnectionLog() {
           console.log("%c\u2705 Backend Connected Successfully!", "color: #10b981; font-weight: bold; font-size: 1.1rem;");
           const data = await response.json();
           console.log("[Backend Response Sample]:", data);
+
+          // After successful connection check, trigger course synchronization
+          await syncCourses();
         } else {
           console.error(`%c\u274C Backend Connection Failed (Status: ${response.status})`, "color: #ef4444; font-weight: bold;");
         }
       } catch (error) {
         console.error("%c\u274C Backend Connection Error:", "color: #ef4444; font-weight: bold;", error);
         console.warn("Check if your Java Spring Boot engine is running on", engineUrl);
+      }
+    }
+
+    async function syncCourses() {
+      try {
+        console.log("[Sync] Triggering course synchronization...");
+        const syncRes = await fetch("/api/admin/sync", { method: "POST" });
+        if (syncRes.ok) {
+          const syncData = await syncRes.json();
+          console.log(`[Sync] Successfully synced ${syncData.count} community courses to Java Engine.`);
+        } else {
+          console.warn("[Sync] Synchronization failed or not authorized.");
+        }
+      } catch (e) {
+        console.error("[Sync] Error triggering sync:", e);
       }
     }
 

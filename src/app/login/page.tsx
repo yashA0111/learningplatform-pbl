@@ -4,49 +4,48 @@ import { useState, Suspense } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { loginSchema } from "@/lib/validations";
-import { CheckCircle2 } from "lucide-react";
+import { loginSchema, LoginInput } from "@/lib/validations";
+import { CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 
 function LoginContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const justVerified = searchParams.get("verified") === "true";
 
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [notVerified, setNotVerified] = useState(false);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<LoginInput>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+  });
+
+  const emailValue = watch("email");
+
+  const onSubmit = async (data: LoginInput) => {
     setLoading(true);
     setError("");
-    setFieldErrors({});
     setNotVerified(false);
-
-    const result = loginSchema.safeParse({ email, password });
-    if (!result.success) {
-      const errors: Record<string, string> = {};
-      result.error.issues.forEach((err) => {
-        if (err.path[0]) {
-          errors[err.path[0] as string] = err.message;
-        }
-      });
-      setFieldErrors(errors);
-      setLoading(false);
-      return;
-    }
 
     const res = await signIn("credentials", {
       redirect: false,
-      email: result.data.email,
-      password: result.data.password,
+      email: data.email,
+      password: data.password,
     });
 
     if (res?.error) {
@@ -80,45 +79,53 @@ function LoginContent() {
           )}
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
             <div className="space-y-2">
               <Label htmlFor="email" className="text-sm font-semibold">Email</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="m@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`h-11 ${fieldErrors.email ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                {...register("email")}
+                className={`h-11 ${errors.email ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               />
-              {fieldErrors.email && <p className="text-xs text-red-500">{fieldErrors.email}</p>}
+              {errors.email && <p className="text-xs text-red-500 font-medium">{errors.email.message}</p>}
             </div>
             <div className="space-y-2">
               <Label htmlFor="password" className="text-sm font-semibold">Password</Label>
               <Input
                 id="password"
                 type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`h-11 ${fieldErrors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+                {...register("password")}
+                className={`h-11 ${errors.password ? "border-red-500 focus-visible:ring-red-500" : ""}`}
               />
-              {fieldErrors.password && <p className="text-xs text-red-500">{fieldErrors.password}</p>}
+              {errors.password && <p className="text-xs text-red-500 font-medium">{errors.password.message}</p>}
             </div>
+            
             {error && (
-              <div className="space-y-2">
-                <p className="text-sm font-medium text-red-500">{error}</p>
-                {notVerified && email && (
+              <div className="space-y-3">
+                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 text-red-600 dark:text-red-400 text-sm font-medium">
+                  <AlertCircle className="h-4 w-4 shrink-0" />
+                  <p>{error}</p>
+                </div>
+                {notVerified && emailValue && (
                   <Link
-                    href={`/verify-email?email=${encodeURIComponent(email)}`}
-                    className="text-sm text-indigo-600 dark:text-indigo-400 font-semibold hover:underline block"
+                    href={`/verify-email?email=${encodeURIComponent(emailValue)}`}
+                    className="text-sm text-indigo-600 dark:text-indigo-400 font-semibold hover:underline flex items-center gap-1 pl-1"
                   >
-                    → Verify your email now
+                    <span>→ Verify your email now</span>
                   </Link>
                 )}
               </div>
             )}
-            <Button className="w-full h-11 text-base font-semibold transition-all hover:scale-[1.02]" type="submit" disabled={loading}>
-              {loading ? "Signing in..." : "Sign In"}
+
+            <Button className="w-full h-11 text-base font-semibold transition-all hover:scale-[1.02] bg-indigo-600 hover:bg-indigo-700 text-white" type="submit" disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Signing in...
+                </>
+              ) : "Sign In"}
             </Button>
           </form>
         </CardContent>
@@ -146,3 +153,4 @@ export default function LoginPage() {
     </Suspense>
   );
 }
+

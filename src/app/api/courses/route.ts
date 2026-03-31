@@ -40,18 +40,32 @@ export async function POST(req: Request) {
       );
     }
 
-    // Format tags (trim whitespace, remove empty)
-    const formattedTags = Array.isArray(tags) 
-      ? tags.map(tag => tag.trim()).filter(tag => tag !== "")
-      : [];
-
     const newCourse = await Course.create({
       title,
       url,
       platform,
-      tags: formattedTags,
+      tags,
       submittedBy: dbUser._id,
     });
+
+    // --- SYNC WITH JAVA ENGINE ---
+    try {
+      const engineUrl = process.env.NEXT_PUBLIC_ENGINE_URL || "http://localhost:8080";
+      await fetch(`${engineUrl}/api/recommend/register`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          id: newCourse._id.toString(),
+          title: newCourse.title,
+          tags: newCourse.tags,
+        }),
+      });
+      console.log(`[API] Course synced to Java Engine: ${newCourse.title}`);
+    } catch (syncError) {
+      console.error("[API] Failed to sync course to Java Engine:", syncError);
+      // We don't fail the request if sync fails, but we log it
+    }
+    // ----------------------------
 
     return NextResponse.json(
       { message: "Course submitted successfully", course: newCourse },

@@ -24,4 +24,18 @@ public class RecommendationController {
     public List<Course> getRecommendationsByInterests(@RequestBody List<String> interests) {
         return recommendationService.recommendCoursesByInterests(interests);
     }
+
+    @PostMapping("/register")
+    public String registerCourse(@RequestBody Course course) {
+        recommendationService.addCourse(course);
+        return "Course registered successfully";
+    }
+
+    @PostMapping("/register-batch")
+    public String registerCourses(@RequestBody List<Course> courses) {
+        for (Course course : courses) {
+            recommendationService.addCourse(course);
+        }
+        return "Batch registered successfully";
+    }
 }

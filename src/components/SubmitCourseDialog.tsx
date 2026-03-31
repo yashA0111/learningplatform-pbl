@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import {
   Dialog,
   DialogContent,
@@ -14,126 +16,150 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { courseFormSchema, CourseFormInput, CourseFormOutput } from "@/lib/validations";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 export function SubmitCourseDialog() {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [serverError, setServerError] = useState("");
   const router = useRouter();
 
-  const [formData, setFormData] = useState({
-    title: "",
-    url: "",
-    platform: "",
-    tags: "",
+  const {
+    register,
+    handleSubmit,
+    reset,
+    formState: { errors },
+  } = useForm<CourseFormInput>({
+    resolver: zodResolver(courseFormSchema) as any,
+    defaultValues: {
+      title: "",
+      url: "",
+      platform: "",
+      tags: "",
+    },
   });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const onSubmit = async (data: CourseFormInput) => {
+    // The data passed by zodResolver will actually be CourseFormOutput
+    const validatedData = data as unknown as CourseFormOutput;
+    
     setLoading(true);
+    setServerError("");
 
     try {
-      const tagsArray = formData.tags.split(",").map(tag => tag.trim()).filter(Boolean);
-      
       const res = await fetch("/api/courses", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          title: formData.title,
-          url: formData.url,
-          platform: formData.platform,
-          tags: tagsArray,
-        }),
+        body: JSON.stringify(validatedData),
       });
 
       if (res.ok) {
         setOpen(false);
-        setFormData({ title: "", url: "", platform: "", tags: "" });
+        reset();
         router.refresh();
       } else {
-        const data = await res.json();
-        alert(`Error: ${data.message}`);
+        const result = await res.json();
+        setServerError(result.message || "Failed to submit course");
       }
     } catch (error) {
       console.error(error);
-      alert("Something went wrong");
+      setServerError("An unexpected error occurred");
     } finally {
       setLoading(false);
     }
   };
 
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={(val) => {
+      setOpen(val);
+      if (!val) {
+        reset();
+        setServerError("");
+      }
+    }}>
       <DialogTrigger
         render={
-          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+          <Button className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold shadow-sm transition-all hover:scale-[1.02]">
             Submit a Course
           </Button>
         }
       />
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] border-slate-200 dark:border-slate-800 shadow-2xl">
         <DialogHeader>
-          <DialogTitle>Submit a Course</DialogTitle>
-          <DialogDescription>
-            Share a great course you found with the community.
+          <DialogTitle className="text-2xl font-bold text-slate-900 dark:text-white">Submit a Course</DialogTitle>
+          <DialogDescription className="text-slate-500 dark:text-slate-400">
+            Share a great resource with the community. All fields are validated for quality.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit}>
-          <div className="grid gap-4 py-4">
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <div className="grid gap-5 py-4">
             <div className="grid gap-2">
-              <Label htmlFor="title">Course Title</Label>
+              <Label htmlFor="title" className="text-sm font-semibold">Course Title</Label>
               <Input
                 id="title"
-                name="title"
                 placeholder="e.g. Complete React Guide"
-                value={formData.title}
-                onChange={handleChange}
-                required
+                {...register("title")}
+                className={errors.title ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {errors.title && <p className="text-xs font-medium text-red-500">{errors.title.message}</p>}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="url">URL</Label>
+              <Label htmlFor="url" className="text-sm font-semibold">URL</Label>
               <Input
                 id="url"
-                name="url"
                 type="url"
                 placeholder="https://..."
-                value={formData.url}
-                onChange={handleChange}
-                required
+                {...register("url")}
+                className={errors.url ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {errors.url && <p className="text-xs font-medium text-red-500">{errors.url.message}</p>}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="platform">Platform</Label>
+              <Label htmlFor="platform" className="text-sm font-semibold">Platform</Label>
               <Input
                 id="platform"
-                name="platform"
                 placeholder="e.g. Udemy, YouTube, Coursera"
-                value={formData.platform}
-                onChange={handleChange}
-                required
+                {...register("platform")}
+                className={errors.platform ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {errors.platform && <p className="text-xs font-medium text-red-500">{errors.platform.message}</p>}
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="tags">Tags (comma-separated)</Label>
+              <Label htmlFor="tags" className="text-sm font-semibold">Tags (comma-separated)</Label>
               <Input
                 id="tags"
-                name="tags"
                 placeholder="React, JavaScript, Frontend"
-                value={formData.tags}
-                onChange={handleChange}
+                {...register("tags")}
+                className={errors.tags ? "border-red-500 focus-visible:ring-red-500" : ""}
               />
+              {errors.tags ? (
+                <p className="text-xs font-medium text-red-500">{errors.tags.message}</p>
+              ) : (
+                <p className="text-[10px] text-slate-400">At least 1 tag, max 10. Tags must be 1-30 chars.</p>
+              )}
             </div>
           </div>
-          <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+          
+          {serverError && (
+            <div className="mb-4 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg flex items-center gap-2 text-red-600 dark:text-red-400 text-sm font-medium">
+              <AlertCircle className="h-4 w-4" />
+              {serverError}
+            </div>
+          )}
+
+          <DialogFooter className="gap-2 sm:gap-0">
+            <Button type="button" variant="outline" onClick={() => setOpen(false)} className="hover:bg-slate-100 dark:hover:bg-slate-800">
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
-              {loading ? "Submitting..." : "Submit"}
+            <Button type="submit" disabled={loading} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold">
+              {loading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Submitting...
+                </>
+              ) : "Submit Course"}
             </Button>
           </DialogFooter>
         </form>
@@ -141,3 +167,5 @@ export function SubmitCourseDialog() {
     </Dialog>
   );
 }
+
+

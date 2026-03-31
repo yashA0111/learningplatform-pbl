@@ -9,11 +9,12 @@ import org.springframework.stereotype.Service;
 import java.io.InputStream;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 public class RecommendationService {
 
-    private List<Course> courses = new ArrayList<>();
+    private List<Course> courses = new CopyOnWriteArrayList<>();
     
     // Mock user database with predefined interests
     private final Map<String, List<String>> userInterests = Map.of(
@@ -28,10 +29,21 @@ public class RecommendationService {
             ObjectMapper mapper = new ObjectMapper();
             InputStream is = getClass().getResourceAsStream("/courses.json");
             if (is != null) {
-                courses = mapper.readValue(is, new TypeReference<List<Course>>(){});
+                List<Course> initialCourses = mapper.readValue(is, new TypeReference<List<Course>>(){});
+                courses.addAll(initialCourses);
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    public void addCourse(Course course) {
+        if (course != null) {
+            // Check if course already exists (by ID) to avoid duplicates
+            boolean exists = courses.stream().anyMatch(c -> c.getId() != null && c.getId().equals(course.getId()));
+            if (!exists) {
+                courses.add(course);
+            }
         }
     }
 

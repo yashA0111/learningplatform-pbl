@@ -1,5 +1,6 @@
 package com.learningplatform.engine.controller;
 
+import com.learningplatform.engine.dto.RecommendationRequest;
 import com.learningplatform.engine.model.Course;
 import com.learningplatform.engine.service.RecommendationService;
 import lombok.RequiredArgsConstructor;
@@ -21,8 +22,8 @@ public class RecommendationController {
     }
 
     @PostMapping("/by-interests")
-    public List<Course> getRecommendationsByInterests(@RequestBody List<String> interests) {
-        return recommendationService.recommendCoursesByInterests(interests);
+    public List<Course> getRecommendationsByInterests(@RequestBody RecommendationRequest request) {
+        return recommendationService.recommendCoursesByInterests(request.getInterests(), request.getCompletedCourses());
     }
 
     @PostMapping("/register")

@@ -70,7 +70,7 @@ export default async function DashboardPage() {
         </div>
 
         <Suspense fallback={<RecommendationsSkeleton />}>
-          <RecommendationsList interests={interests} />
+          <RecommendationsList interests={interests} completedCourses={completedCourses} />
         </Suspense>
 
         <div className="pt-8 border-t border-slate-200 dark:border-slate-800">

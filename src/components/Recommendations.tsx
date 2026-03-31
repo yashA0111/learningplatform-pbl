@@ -9,7 +9,7 @@ type Course = {
   tags: string[];
 };
 
-async function fetchRecommendations(interests: string[]): Promise<Course[]> {
+async function fetchRecommendations(interests: string[], completedCourses: string[]): Promise<Course[]> {
   try {
     const engineUrl = process.env.NEXT_PUBLIC_ENGINE_URL || "http://localhost:8080";
     const res = await fetch(`${engineUrl}/api/recommend/by-interests`, {
@@ -17,7 +17,7 @@ async function fetchRecommendations(interests: string[]): Promise<Course[]> {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(interests),
+      body: JSON.stringify({ interests, completedCourses }),
       cache: "no-store",
     });
     
@@ -37,8 +37,8 @@ async function fetchRecommendations(interests: string[]): Promise<Course[]> {
   }
 }
 
-export async function RecommendationsList({ interests }: { interests: string[] }) {
-  const recommendedCourses = await fetchRecommendations(interests);
+export async function RecommendationsList({ interests, completedCourses = [] }: { interests: string[], completedCourses?: string[] }) {
+  const recommendedCourses = await fetchRecommendations(interests, completedCourses);
 
   // Calculate generic mastery/skill gap
   // User interests vs Recommended course tags

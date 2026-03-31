@@ -64,14 +64,23 @@ public class RecommendationService {
                 .collect(Collectors.toList());
     }
 
-    public List<Course> recommendCoursesByInterests(List<String> interests) {
+    public List<Course> recommendCoursesByInterests(List<String> interests, List<String> completedCourses) {
         if (interests == null || interests.isEmpty()) {
             return Collections.emptyList();
         }
 
         Set<String> userInterestsSet = new HashSet<>(interests);
+        Set<String> completedCoursesSet = completedCourses != null ? 
+                completedCourses.stream().map(String::toLowerCase).collect(Collectors.toSet()) : 
+                Collections.emptySet();
 
         return courses.stream()
+                .filter(course -> {
+                    // Filter out courses the user HAS completed
+                    String titleLower = course.getTitle().toLowerCase();
+                    String idLower = course.getId().toLowerCase();
+                    return !completedCoursesSet.contains(titleLower) && !completedCoursesSet.contains(idLower);
+                })
                 .sorted((c1, c2) -> Double.compare(
                         calculateJaccardSimilarity(new HashSet<>(c2.getTags()), userInterestsSet),
                         calculateJaccardSimilarity(new HashSet<>(c1.getTags()), userInterestsSet)

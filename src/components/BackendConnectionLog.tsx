@@ -18,7 +18,7 @@ export function BackendConnectionLog() {
         const response = await fetch(`${engineUrl}/api/recommend/by-interests`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify([]),
+          body: JSON.stringify({ interests: [], completedCourses: [] }),
         });
 
         if (response.ok) {

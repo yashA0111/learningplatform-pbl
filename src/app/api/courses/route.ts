@@ -57,6 +57,7 @@ export async function POST(req: Request) {
         body: JSON.stringify({
           id: newCourse._id.toString(),
           title: newCourse.title,
+          url: newCourse.url,
           tags: newCourse.tags,
         }),
       });

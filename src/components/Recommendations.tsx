@@ -58,14 +58,10 @@ export async function RecommendationsList({ interests }: { interests: string[] }
         {recommendedCourses.length > 0 ? (
           <ScrollArea className="w-full whitespace-nowrap rounded-md border border-slate-200 dark:border-slate-800">
             <div className="flex w-max space-x-3 sm:space-x-4 p-3 sm:p-4">
-              {recommendedCourses.map((course) => (
-                <a 
-                  key={course.id} 
-                  href={course.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer"
-                  className="block transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                >
+              {recommendedCourses.map((course) => {
+                const hasValidUrl = course.url && course.url.trim().length > 0;
+                
+                const cardContent = (
                   <Card className="w-[240px] sm:w-[300px] shrink-0 shadow-sm transition-all hover:shadow-md dark:border-slate-800 h-full">
                     <CardHeader>
                       <CardTitle className="truncate">{course.title}</CardTitle>
@@ -86,8 +82,28 @@ export async function RecommendationsList({ interests }: { interests: string[] }
                       </div>
                     </CardContent>
                   </Card>
-                </a>
-              ))}
+                );
+
+                if (hasValidUrl) {
+                  return (
+                    <a 
+                      key={course.id} 
+                      href={course.url.startsWith('http') ? course.url : `https://${course.url}`} 
+                      target="_blank" 
+                      rel="noopener noreferrer"
+                      className="block transition-transform hover:scale-[1.02] active:scale-[0.98]"
+                    >
+                      {cardContent}
+                    </a>
+                  );
+                }
+
+                return (
+                  <div key={course.id}>
+                    {cardContent}
+                  </div>
+                );
+              })}
             </div>
             <ScrollBar orientation="horizontal" />
           </ScrollArea>

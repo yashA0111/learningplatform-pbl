@@ -47,7 +47,6 @@ export default async function ExplorePage() {
     return { ...course, _id: course._id.toString(), score };
   }).sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
-    // @ts-expect-error: createdAt timestamp exists on document
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 

@@ -3,6 +3,7 @@ import bcrypt from "bcryptjs";
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
 import { Resend } from "resend";
+import { emailSchema } from "@/lib/validations";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
@@ -12,11 +13,15 @@ function generateOtp(): string {
 
 export async function POST(req: NextRequest) {
   try {
-    const { email } = await req.json();
+    const body = await req.json();
+    const result = emailSchema.safeParse(body);
 
-    if (!email) {
-      return NextResponse.json({ message: "Email is required" }, { status: 400 });
+    if (!result.success) {
+      const firstError = result.error.issues[0]?.message || "Invalid input";
+      return NextResponse.json({ message: firstError }, { status: 400 });
     }
+
+    const { email } = result.data;
 
     await connectToDatabase();
 

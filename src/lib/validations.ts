@@ -55,3 +55,27 @@ export const otpSchema = z.object({
 export type SignupInput = z.infer<typeof signupSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type OtpInput = z.infer<typeof otpSchema>;
+
+export const courseSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  url: z.string().url("Must be a valid URL"),
+  platform: z.string().min(1, "Platform is required"),
+  tags: z.array(z.string()).optional().default([]),
+});
+
+export const userUpdateSchema = z.object({
+  interests: z.array(z.string()).optional(),
+  completedCourses: z.array(z.string()).optional(),
+});
+
+export const emailSchema = z.object({
+  email: z
+    .string()
+    .regex(emailRegex, "Invalid email")
+    .trim()
+    .toLowerCase(),
+});
+
+export type CourseInput = z.infer<typeof courseSchema>;
+export type UserUpdateInput = z.infer<typeof userUpdateSchema>;
+export type EmailInput = z.infer<typeof emailSchema>;

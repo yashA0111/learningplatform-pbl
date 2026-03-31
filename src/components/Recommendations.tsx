@@ -19,6 +19,13 @@ async function fetchRecommendations(interests: string[]): Promise<Course[]> {
       body: JSON.stringify(interests),
       cache: "no-store",
     });
+    
+    if (res.ok) {
+      console.log(`[Server] Successfully connected to Java Engine at ${engineUrl}`);
+    } else {
+      console.error(`[Server] Java Engine connection failed: ${res.status} ${res.statusText}`);
+    }
+
     if (!res.ok) {
       throw new Error(`Failed to fetch recommendations: ${res.statusText}`);
     }

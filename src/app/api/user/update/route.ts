@@ -3,6 +3,7 @@ import { authOptions } from "@/lib/auth";
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
+import { userUpdateSchema } from "@/lib/validations";
 
 export async function PATCH(req: Request) {
   const session = await getServerSession(authOptions);
@@ -11,7 +12,17 @@ export async function PATCH(req: Request) {
   }
 
   const body = await req.json();
-  const { interests, completedCourses } = body;
+  const result = userUpdateSchema.safeParse(body);
+
+  if (!result.success) {
+    const firstError = result.error.issues[0]?.message || "Invalid input";
+    return NextResponse.json(
+      { error: firstError },
+      { status: 400 }
+    );
+  }
+
+  const { interests, completedCourses } = result.data;
 
   await connectToDatabase();
 

@@ -4,6 +4,7 @@ import { authOptions } from "@/lib/auth";
 import connectToDatabase from "@/lib/mongodb";
 import User from "@/models/User";
 import Course from "@/models/Course";
+import { courseSchema } from "@/lib/validations";
 
 export async function POST(req: Request) {
   try {
@@ -16,14 +17,18 @@ export async function POST(req: Request) {
       );
     }
 
-    const { title, url, platform, tags } = await req.json();
+    const body = await req.json();
+    const result = courseSchema.safeParse(body);
 
-    if (!title || !url || !platform) {
+    if (!result.success) {
+      const firstError = result.error.issues[0]?.message || "Invalid input";
       return NextResponse.json(
-        { message: "Title, URL, and Platform are required" },
+        { message: firstError },
         { status: 400 }
       );
     }
+
+    const { title, url, platform, tags } = result.data;
 
     await connectToDatabase();
 

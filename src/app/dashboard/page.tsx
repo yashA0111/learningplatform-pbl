@@ -9,6 +9,7 @@ import { Suspense } from "react";
 import { RecommendationsList, RecommendationsSkeleton } from "@/components/Recommendations";
 import { ManageListCard } from "@/components/ManageListCard";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
+import { BackendConnectionLog } from "@/components/BackendConnectionLog";
 
 export default async function DashboardPage() {
   const session = await getServerSession(authOptions);
@@ -25,6 +26,7 @@ export default async function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-900 p-4 sm:p-8">
+      <BackendConnectionLog />
       <div className="max-w-4xl mx-auto space-y-6 sm:space-y-8">
         <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 sm:p-6 bg-white dark:bg-slate-800 rounded-xl shadow-sm border border-slate-100 dark:border-slate-700">
           <div>

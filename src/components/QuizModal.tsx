@@ -123,14 +123,14 @@ export function QuizModal({ courseName, courseTags }: { courseName: string, cour
           <Button 
             variant="secondary" 
             size="sm" 
-            className="mt-3 w-full font-semibold relative z-10 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors"
+            className="mt-3 w-full font-semibold rounded-xl relative z-10 bg-indigo-50/80 text-indigo-700 hover:bg-indigo-100 dark:bg-indigo-900/40 dark:hover:bg-indigo-900/60 dark:text-indigo-300 active:scale-[0.97] transition-all shadow-sm hover:shadow"
             onClick={(e) => e.stopPropagation()}
           />
         }
       >
         Test Your Knowledge
       </DialogTrigger>
-      <DialogContent className="sm:max-w-lg fixed z-50">
+      <DialogContent className="sm:max-w-lg w-[95vw] fixed z-50 max-h-[90vh] overflow-y-auto rounded-2xl">
         <DialogHeader>
           <DialogTitle>Diagnostic Quiz: {courseName}</DialogTitle>
           <DialogDescription>
@@ -160,14 +160,34 @@ export function QuizModal({ courseName, courseTags }: { courseName: string, cour
             </div>
             
             <RadioGroup value={selectedAnswer} onValueChange={setSelectedAnswer} className="space-y-3">
-              {questions[currentIndex].options.map((option, idx) => (
-                <div key={idx} className="flex items-center space-x-2">
-                  <RadioGroupItem value={option} id={`option-${idx}`} />
-                  <Label htmlFor={`option-${idx}`} className="text-sm cursor-pointer capitalize-first">
-                    {option}
-                  </Label>
-                </div>
-              ))}
+              {questions[currentIndex].options.map((option, idx) => {
+                const isSelected = selectedAnswer === option;
+                return (
+                  <div 
+                    key={idx} 
+                    className={`flex items-center space-x-3 p-3 rounded-xl border-2 transition-all cursor-pointer active:scale-[0.99] ${
+                      isSelected 
+                        ? "border-indigo-600 bg-indigo-50/50 dark:bg-indigo-900/30 dark:border-indigo-500 shadow-sm" 
+                        : "border-slate-200 hover:border-indigo-200 hover:bg-slate-50 dark:border-slate-700 dark:hover:border-indigo-800/50 dark:hover:bg-slate-800/50"
+                    }`}
+                    onClick={() => setSelectedAnswer(option)}
+                  >
+                    <RadioGroupItem 
+                      value={option} 
+                      id={`option-${idx}`} 
+                      className={isSelected ? "border-indigo-600 text-indigo-600 dark:border-indigo-500 dark:text-indigo-400" : ""} 
+                    />
+                    <Label 
+                      htmlFor={`option-${idx}`} 
+                      className={`text-sm cursor-pointer capitalize-first flex-1 leading-relaxed ${
+                        isSelected ? "font-medium text-slate-900 dark:text-white" : "text-slate-700 dark:text-slate-300"
+                      }`}
+                    >
+                      {option}
+                    </Label>
+                  </div>
+                );
+              })}
             </RadioGroup>
             
             <div className="flex justify-end pt-4">

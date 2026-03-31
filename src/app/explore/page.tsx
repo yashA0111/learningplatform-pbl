@@ -39,7 +39,7 @@ export default async function ExplorePage() {
   // Fetch all community courses (lean() returns plain JS objects)
   const allCourses = await Course.find({})
     .populate("submittedBy", "name")
-    .lean() as unknown as (ICourse & { _id: any, submittedBy: { name: string } })[];
+    .lean() as unknown as (ICourse & { _id: { toString: () => string }, submittedBy: { name: string }, createdAt: string | Date })[];
 
   // Sort by similarity, then by newest
   const sortedCourses = [...allCourses].map(course => {
@@ -47,7 +47,7 @@ export default async function ExplorePage() {
     return { ...course, _id: course._id.toString(), score };
   }).sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
-    // @ts-ignore
+    // @ts-expect-error
     return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
   });
 
@@ -113,7 +113,7 @@ export default async function ExplorePage() {
   );
 }
 
-function CourseCard({ course }: { course: any }) {
+function CourseCard({ course }: { course: ICourse & { _id: string, score?: number, submittedBy?: { name: string } } }) {
   return (
     <a href={course.url} target="_blank" rel="noopener noreferrer" className="block h-full">
       <Card className="h-full flex flex-col hover:shadow-md transition-shadow dark:border-slate-800 bg-white dark:bg-slate-800/50">

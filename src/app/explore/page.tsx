@@ -112,7 +112,7 @@ export default async function ExplorePage() {
   );
 }
 
-function CourseCard({ course }: { course: ICourse & { _id: string, score?: number, submittedBy?: { name: string } } }) {
+function CourseCard({ course }: { course: { _id: string, title: string, url: string, platform: string, tags: string[], score?: number, submittedBy?: { name: string } } }) {
   return (
     <a href={course.url} target="_blank" rel="noopener noreferrer" className="block h-full">
       <Card className="h-full flex flex-col hover:shadow-md transition-shadow dark:border-slate-800 bg-white dark:bg-slate-800/50">

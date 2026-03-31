@@ -31,7 +31,12 @@ export default async function DashboardPage() {
             <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">Dashboard</h1>
             <p className="text-sm sm:text-base text-slate-500 dark:text-slate-400 mt-1">Welcome back, <span className="font-semibold text-slate-700 dark:text-slate-300">{session.user?.name}</span></p>
           </div>
-          <div className="mt-4 sm:mt-0">
+          <div className="mt-4 sm:mt-0 flex gap-3">
+            <Link href="/explore">
+              <Button className="font-medium bg-indigo-600 hover:bg-indigo-700 text-white">
+                Explore Courses
+              </Button>
+            </Link>
             <Link href="/api/auth/signout">
               <Button variant="outline" className="font-medium hover:bg-slate-100 dark:hover:bg-slate-700">
                 Sign Out

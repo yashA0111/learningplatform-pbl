@@ -8,6 +8,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { SubmitCourseDialog } from "@/components/SubmitCourseDialog";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { QuizModal } from "@/components/QuizModal";
 
 // Jaccard similarity function
 function calculateJaccardSimilarity(tags1: string[], tags2: string[]): number {
@@ -113,33 +114,46 @@ export default async function ExplorePage() {
 }
 
 function CourseCard({ course }: { course: { _id: string, title: string, url: string, platform: string, tags: string[], score?: number, submittedBy?: { name: string } } }) {
+  const hasValidUrl = course.url && course.url.trim().length > 0;
+  const linkHref = hasValidUrl ? (course.url.startsWith('http') ? course.url : `https://${course.url}`) : undefined;
+
   return (
-    <a href={course.url} target="_blank" rel="noopener noreferrer" className="block h-full">
-      <Card className="h-full flex flex-col hover:shadow-md transition-shadow dark:border-slate-800 bg-white dark:bg-slate-800/50">
-        <CardHeader className="pb-3">
-          <div className="flex justify-between items-start gap-2">
-            <CardTitle className="text-lg leading-tight line-clamp-2">{course.title}</CardTitle>
-            <span className="shrink-0 inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10 dark:bg-indigo-400/10 dark:text-indigo-400 dark:ring-indigo-400/30">{course.platform}</span>
-          </div>
-          <CardDescription className="text-xs pt-1">
-            Shared by {course.submittedBy?.name || "Anonymous"}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="mt-auto pt-0">
-          <div className="flex flex-wrap gap-1.5">
-            {course.tags.slice(0, 4).map((tag: string, idx: number) => (
-              <span key={idx} className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-300">
-                {tag}
-              </span>
-            ))}
-            {course.tags.length > 4 && (
-              <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-500">
-                +{course.tags.length - 4}
-              </span>
+    <Card className="h-full flex flex-col hover:shadow-md transition-shadow dark:border-slate-800 bg-white dark:bg-slate-800/50 relative overflow-hidden">
+      <CardHeader className="pb-3 cursor-pointer">
+        <div className="flex justify-between items-start gap-2">
+          <CardTitle className="text-lg leading-tight line-clamp-2">
+            {hasValidUrl ? (
+              <a href={linkHref} target="_blank" rel="noopener noreferrer" className="after:absolute after:inset-0 focus:outline-none text-slate-900 dark:text-white">
+                {course.title}
+              </a>
+            ) : (
+              <span className="text-slate-900 dark:text-white">{course.title}</span>
             )}
-          </div>
-        </CardContent>
-      </Card>
-    </a>
+          </CardTitle>
+          <span className="shrink-0 inline-flex items-center rounded-md bg-indigo-50 px-2 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-700/10 dark:bg-indigo-400/10 dark:text-indigo-400 dark:ring-indigo-400/30 relative z-10">{course.platform}</span>
+        </div>
+        <CardDescription className="text-xs pt-1">
+          Shared by {course.submittedBy?.name || "Anonymous"}
+        </CardDescription>
+      </CardHeader>
+      <CardContent className="flex-1 pointer-events-none">
+        <div className="flex flex-wrap gap-1.5 pointer-events-auto relative z-10">
+          {course.tags.slice(0, 4).map((tag: string, idx: number) => (
+            <span key={idx} className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-600 dark:text-slate-300">
+              {tag}
+            </span>
+          ))}
+          {course.tags.length > 4 && (
+            <span className="inline-flex items-center rounded-full bg-slate-100 dark:bg-slate-800 px-2 py-0.5 text-xs font-medium text-slate-500">
+              +{course.tags.length - 4}
+            </span>
+          )}
+        </div>
+      </CardContent>
+      <div className="p-4 pt-0 mt-auto pointer-events-auto">
+        <QuizModal courseName={course.title} courseTags={course.tags} />
+      </div>
+    </Card>
   );
 }
+

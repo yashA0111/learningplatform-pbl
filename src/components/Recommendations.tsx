@@ -1,3 +1,4 @@
+import { QuizModal } from "./QuizModal";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea, ScrollBar } from "@/components/ui/scroll-area";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -60,15 +61,24 @@ export async function RecommendationsList({ interests, completedCourses = [] }: 
             <div className="flex w-max space-x-3 sm:space-x-4 p-3 sm:p-4">
               {recommendedCourses.map((course) => {
                 const hasValidUrl = course.url && course.url.trim().length > 0;
+                const linkHref = hasValidUrl ? (course.url.startsWith('http') ? course.url : `https://${course.url}`) : undefined;
                 
                 const cardContent = (
-                  <Card className="w-[240px] sm:w-[300px] shrink-0 shadow-sm transition-all hover:shadow-md dark:border-slate-800 h-full">
-                    <CardHeader>
-                      <CardTitle className="truncate">{course.title}</CardTitle>
+                  <Card key={course.id} className="w-[240px] sm:w-[300px] shrink-0 shadow-sm transition-transform hover:shadow-md hover:scale-[1.02] active:scale-[0.98] dark:border-slate-800 h-[280px] flex flex-col relative overflow-hidden">
+                    <CardHeader className="pb-3 cursor-pointer">
+                      <CardTitle className="truncate">
+                        {hasValidUrl ? (
+                          <a href={linkHref} target="_blank" rel="noopener noreferrer" className="after:absolute after:inset-0 focus:outline-none text-slate-900 dark:text-white">
+                            {course.title}
+                          </a>
+                        ) : (
+                          <span className="text-slate-900 dark:text-white">{course.title}</span>
+                        )}
+                      </CardTitle>
                       <CardDescription className="truncate">Course ID: {course.id}</CardDescription>
                     </CardHeader>
-                    <CardContent>
-                      <div className="flex flex-wrap gap-2">
+                    <CardContent className="flex-1 overflow-hidden pointer-events-none">
+                      <div className="flex flex-wrap gap-2 pointer-events-auto relative z-10">
                         {course.tags.slice(0, 3).map((tag, idx) => (
                           <span key={idx} className="inline-flex items-center rounded-full bg-indigo-50 dark:bg-indigo-900/30 px-2.5 py-0.5 text-xs font-semibold text-indigo-700 dark:text-indigo-400">
                             {tag}
@@ -81,28 +91,13 @@ export async function RecommendationsList({ interests, completedCourses = [] }: 
                         )}
                       </div>
                     </CardContent>
+                    <div className="p-4 pt-0 mt-auto pointer-events-auto">
+                      <QuizModal courseName={course.title} courseTags={course.tags} />
+                    </div>
                   </Card>
                 );
 
-                if (hasValidUrl) {
-                  return (
-                    <a 
-                      key={course.id} 
-                      href={course.url.startsWith('http') ? course.url : `https://${course.url}`} 
-                      target="_blank" 
-                      rel="noopener noreferrer"
-                      className="block transition-transform hover:scale-[1.02] active:scale-[0.98]"
-                    >
-                      {cardContent}
-                    </a>
-                  );
-                }
-
-                return (
-                  <div key={course.id}>
-                    {cardContent}
-                  </div>
-                );
+                return cardContent;
               })}
             </div>
             <ScrollBar orientation="horizontal" />

@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { motion, AnimatePresence } from "framer-motion";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +26,7 @@ export function ManageListCard({
   field,
   placeholder,
   titleClassName = "",
-  tagClassName = "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400",
+  tagClassName = "bg-indigo-50/80 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400 ring-1 ring-inset ring-indigo-500/10",
 }: ManageListCardProps) {
   const [items, setItems] = useState<string[]>(initialItems);
   const [inputValue, setInputValue] = useState("");
@@ -41,7 +42,6 @@ export function ManageListCard({
     });
     if (!res.ok) {
       console.error("Failed to update");
-      // Optional: show a toast error here
     }
   }
 
@@ -89,7 +89,7 @@ export function ManageListCard({
   }
 
   return (
-    <Card className="shadow-md border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800/50">
+    <Card className="shadow-sm hover:shadow-md transition-all duration-300 border-slate-200/60 dark:border-slate-700/40 bg-white/70 dark:bg-slate-800/50 backdrop-blur-sm rounded-2xl overflow-hidden h-full">
       <CardHeader className="p-4 sm:p-6">
         <CardTitle className={`text-lg sm:text-xl font-bold ${titleClassName}`}>{title}</CardTitle>
         <CardDescription className="text-xs sm:text-sm text-slate-500 dark:text-slate-400">{description}</CardDescription>
@@ -106,13 +106,13 @@ export function ManageListCard({
                 if (error) setError(null);
               }}
               onKeyDown={handleKeyDown}
-              className={`flex-1 ${error ? "border-red-500 focus-visible:ring-red-500" : ""}`}
+              className={`flex-1 bg-white/50 dark:bg-slate-800/50 border-slate-200/80 dark:border-slate-700/60 rounded-xl transition-all duration-300 focus:ring-4 focus:ring-indigo-500/15 focus:border-indigo-400 dark:focus:border-indigo-500 ${error ? "border-red-500 focus-visible:ring-red-500" : ""}`}
             />
             <Button
               onClick={handleAdd}
               size="sm"
               disabled={isPending || !inputValue.trim()}
-              className="shrink-0 bg-slate-900 dark:bg-slate-100 dark:text-slate-900"
+              className="shrink-0 bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-500 hover:to-violet-500 text-white rounded-xl shadow-sm hover:shadow-md hover:shadow-indigo-500/15 transition-all duration-300 hover:scale-105 active:scale-95"
             >
               {isPending ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -121,34 +121,48 @@ export function ManageListCard({
               )}
             </Button>
           </div>
-          {error && (
-            <p className="text-xs font-medium text-red-500 flex items-center gap-1">
-              <AlertCircle className="h-3 w-3" />
-              {error}
-            </p>
-          )}
+          <AnimatePresence>
+            {error && (
+              <motion.p
+                initial={{ opacity: 0, y: -5, height: 0 }}
+                animate={{ opacity: 1, y: 0, height: "auto" }}
+                exit={{ opacity: 0, y: -5, height: 0 }}
+                className="text-xs font-medium text-red-500 flex items-center gap-1"
+              >
+                <AlertCircle className="h-3 w-3" />
+                {error}
+              </motion.p>
+            )}
+          </AnimatePresence>
         </div>
 
         {items.length > 0 ? (
           <div className="flex flex-wrap gap-2">
-            {items.map((item, i) => (
-              <span
-                key={i}
-                className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-sm font-medium transition-colors ${tagClassName}`}
-              >
-                {item}
-                <button
-                  onClick={() => handleRemove(item)}
-                  className="ml-1 rounded-full p-0.5 hover:bg-black/10 dark:hover:bg-white/10 transition-colors"
-                  disabled={isPending}
+            <AnimatePresence mode="popLayout">
+              {items.map((item) => (
+                <motion.span
+                  key={item}
+                  layout
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  exit={{ opacity: 0, scale: 0.8, transition: { duration: 0.15 } }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
+                  className={`inline-flex items-center gap-1 rounded-xl px-3 py-1.5 text-sm font-medium transition-colors ${tagClassName}`}
                 >
-                  <X className="h-3 w-3" />
-                </button>
-              </span>
-            ))}
+                  {item}
+                  <button
+                    onClick={() => handleRemove(item)}
+                    className="ml-1 rounded-full p-0.5 hover:bg-black/10 dark:hover:bg-white/10 transition-all duration-200 hover:scale-110 active:scale-90"
+                    disabled={isPending}
+                  >
+                    <X className="h-3 w-3" />
+                  </button>
+                </motion.span>
+              ))}
+            </AnimatePresence>
           </div>
         ) : (
-          <div className="py-4 text-center border border-dashed border-slate-200 dark:border-slate-800 rounded-lg">
+          <div className="py-6 text-center border border-dashed border-slate-200/60 dark:border-slate-700/40 rounded-xl">
             <p className="text-sm text-slate-400 italic">None added yet.</p>
           </div>
         )}
@@ -156,4 +170,3 @@ export function ManageListCard({
     </Card>
   );
 }
-

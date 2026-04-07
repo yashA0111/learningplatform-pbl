@@ -91,7 +91,28 @@ export function QuizModal({ courseName, courseTags }: { courseName: string, cour
 
   const finishQuiz = async (finalWeakPoints: string[]) => {
     setIsFinished(true);
-    
+
+    // Calculate final score (current score + whether last question was correct)
+    const lastQ = questions[currentIndex];
+    const lastCorrect = selectedAnswer === lastQ.correctAnswer;
+    const finalScore = score + (lastCorrect ? 1 : 0);
+
+    // Persist quiz result
+    try {
+      await fetch("/api/quiz/save", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          courseName,
+          score: finalScore,
+          totalQuestions: questions.length,
+          weakPoints: finalWeakPoints,
+        }),
+      });
+    } catch (err) {
+      console.error("Failed to save quiz result:", err);
+    }
+
     if (finalWeakPoints.length > 0) {
       setRemedialLoading(true);
       try {

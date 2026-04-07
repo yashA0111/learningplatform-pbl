@@ -11,6 +11,7 @@ import { ManageListCard } from "@/components/ManageListCard";
 import { DeleteAccountButton } from "@/components/DeleteAccountButton";
 import { BackendConnectionLog } from "@/components/BackendConnectionLog";
 import { DashboardShell, AnimatedHeader, AnimatedGridItem, AnimatedDivider } from "@/components/DashboardShell";
+import { QuizHistory } from "@/components/QuizHistory";
 import { Compass, LogOut, LayoutDashboard } from "lucide-react";
 
 export default async function DashboardPage() {
@@ -89,6 +90,8 @@ export default async function DashboardPage() {
         <Suspense fallback={<RecommendationsSkeleton />}>
           <RecommendationsList interests={interests} completedCourses={completedCourses} />
         </Suspense>
+
+        <QuizHistory />
 
         <AnimatedDivider className="pt-8 border-t border-slate-200/60 dark:border-slate-800/60">
           <DeleteAccountButton />
